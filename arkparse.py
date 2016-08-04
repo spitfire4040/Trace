@@ -6,16 +6,13 @@ import urllib
 import gzip
 from requests.auth import HTTPBasicAuth
 import requests
+import time
 
 
 # get day from command line args
 year = sys.argv[1]
 month = sys.argv[2]
 day = sys.argv[3]
-
-print ('year: ', year)
-print ('month: ', month)
-print ('day: ', day)
 
 # initialize node list
 nodelist = []
@@ -27,7 +24,7 @@ def parse():
 	global day, month, year
 
 	# open nodelist file
-	f = open("/home/jthom/Trace/ark_nodes.txt", "r")
+	f = open("/home/jay/Trace/ark_nodes.txt", "r")
 
 	# read nodes into list
 	for item in f:
@@ -55,22 +52,22 @@ def parse():
 	count = 1
 
 	# check for directories and create if necessary
-	if not os.path.exists("/home/jthom/Trace/ArkData"):
-		os.makedirs("/home/jthom/Trace/ArkData")
+	if not os.path.exists("/home/jay/Trace/ArkData"):
+		os.makedirs("/home/jay/Trace/ArkData")
 
-	if not os.path.exists("/home/jthom/Trace/Processing"):
-		os.makedirs("/home/jthom/Trace/Processing")
+	if not os.path.exists("/home/jay/Trace/ark-temp"):
+		os.makedirs("/home/jay/Trace/ark-temp")
 
 	# open files for write
-	out1 = open("/home/jthom/Trace/ArkData/all-traces.txt", "w")
-	out2 = open("/home/jthom/Trace/ArkData/unique-traces.txt", "w")
-	out3 = open("/home/jthom/Trace/ArkData/all-ip.txt", "w")
-	out4 = open("/home/jthom/Trace/ArkData/unique-ip.txt", "w")
-	out5 = open("/home/jthom/Trace/ArkData/unique-edge.txt", "w")
-	out6 = open("/home/jthom/Trace/ArkData/stats.txt", "w")
+	out1 = open("/home/jay/Trace/ArkData/all_trace.txt", "w")
+	out2 = open("/home/jay/Trace/ArkData/unique_trace.txt", "w")
+	out3 = open("/home/jay/Trace/ArkData/all_ip.txt", "w")
+	out4 = open("/home/jay/Trace/ArkData/unique_ip.txt", "w")
+	out5 = open("/home/jay/Trace/ArkData/unique_edge.txt", "w")
+	out6 = open("/home/jay/Trace/ArkData/stats.txt", "w")
 
 	# iterate through each team
-	for x in range(1, 2):
+	for x in range(1, 4):
 
 		# cycle through each file for team/day
 		for item in nodelist:
@@ -82,20 +79,20 @@ def parse():
 			filename = "https://topo-data.caida.org/team-probing/list-7.allpref24/team-" + str(x) + "/daily/" + year + "/cycle-" + year + month + day + "/daily.l7.t1.c004642." + year + month + day + "." + item + ".warts.gz"
 
 			# fetch file with requests
-			r = requests.get(filename, auth=("jthom@cse.unr.edu", "sherdnig3544"))
+			r = requests.get(filename, auth=("jay@cse.unr.edu", "sherdnig3544"))
 
 			# open file for write
-			f = open("/home/jthom/Trace/Processing/temp.gz", "wb")
+			f = open("/home/jay/Trace/ark-temp/temp.gz", "wb")
 			for chunk in r.iter_content(chunk_size=512 * 1024):
 				if chunk:
 					f.write(chunk)
 			f.close()
 
 			# use scamper to convert to text file
-			os.system("zcat /home/jthom/Trace/Processing/temp.gz | sc_warts2text > /home/jthom/Trace/Processing/warts.txt")
+			os.system("zcat /home/jay/Trace/ark-temp/temp.gz | sc_warts2text > /home/jay/Trace/ark-temp/warts.txt")
 
 			# open textfile for read
-			f = open("/home/jthom/Trace/Processing/warts.txt", "r")
+			f = open("/home/jay/Trace/ark-temp/warts.txt", "r")
 
 			try:
 				# iterate through each line
@@ -260,15 +257,23 @@ def parse():
 
 
 def main(argv):
+	
+	start = time.time()
+
 	# run parse
 	parse()
 
-
 	# trace count
-	os.system("./ark-tracecount")
+	os.system("./ark_tracecount")
 
 	# ip count
-	os.system("./ark-ipcount")
+	os.system("./ark_ipcount")
+
+	end = time.time()
+
+	with open("log.txt", "a") as f:
+		f.write("Ark Runtime: " + str(end - start) + '\n')
+
 
 
 if __name__ == '__main__':

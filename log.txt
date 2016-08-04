@@ -1,0 +1,5 @@
+
+Ripe Runtime: 55929.431392
+Ark Runtime: 692.842866897583
+Mlab Runtime: 156.380896091
+iPlane Runtime: 1913.74992609

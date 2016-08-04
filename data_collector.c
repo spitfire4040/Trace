@@ -9,20 +9,20 @@
 int main(int argc, char *argv[])
 {
 	// initialize variables
-	time_t start, end;
-	float elapsed;
+	time_t e_time;
 	int year, month, day, sleep = 0;
 	bool yearflag = false, monthflag = false, dayflag = false;
 	char y[4];
 	char m[2];
 	char d[2];
+	char e[2];
 	char temp[3];
 	char et[11];
+	char ripeparams[40];
 	char arkparams[40];
 	char mlabparams[40];
 	char iplaneparams[40];
 	char* zero = "0";
-	time_t e_time;
 
 	// outfile pointers
 	FILE* outfile1;
@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
 	t.tm_sec = 00;
 	t.tm_isdst = 0;
 	e_time = mktime (&t);
+	sprintf(e, "%ld", e_time);
 
 	// convert year to string
 	sprintf(y, "%d", year);
@@ -115,37 +116,18 @@ int main(int argc, char *argv[])
 
 	// print selected date
 	printf("Working: %s/%s/%s\n", m, d, y);
-	printf("Unix epoch time: %ld\n", (long) e_time);
-
-	// write unix time to start_time file for ripe
-	outfile1 = fopen("start_time.txt", "w");
-	fprintf(outfile1, "%d", e_time);
-	fclose(outfile1);
+	printf("Unix epoch time: %ld\n", e_time);
 
 	// run script syscalls
 
-	// open log file
-	outfile2 = fopen("log.txt", "w");	
-
-	// set start time for timer
-	start = clock();
-
-
 	// call ripe
+	strcpy(ripeparams, "python ripe_day.py ");
+	strcat(ripeparams, e);
 	printf("Working Ripe...\n");
-	system("python ripe.py");
-
-	// get ending time for timer and calculate total time
-	end = clock();
-	elapsed = (end-start) / CLOCKS_PER_SEC;
-
-	// print time to log file
-	fprintf(outfile2, "Elapsed time for Ripe: %f", elapsed);	
+	system(ripeparams);
 
 
 	// call ark
-	// set start time for timer
-	start = clock();
 
 	// build string for parameter
 	strcpy(arkparams, "python3.5 arkparse.py ");
@@ -155,19 +137,10 @@ int main(int argc, char *argv[])
 	strcat(arkparams, " ");
 	strcat(arkparams, d);
 	printf("Working Ark...\n");
-	system(arkparams);
-
-	// get ending time for timer and calculate total time
-	end = clock();
-	elapsed = (end-start) / CLOCKS_PER_SEC;
-
-	// print time to log file
-	fprintf(outfile2, "Elapsed time for Ark: %f\n", elapsed);	
+	system(arkparams);	
 
 
 	// call mlab
-	// set start time for timer
-	start = clock();
 
 	// build string for parameter
 	strcpy(mlabparams, "python mlab.py ");
@@ -178,18 +151,9 @@ int main(int argc, char *argv[])
 	strcat(mlabparams, d);
 	printf("Working M-lab...\n");
 	system(mlabparams);
-
-	// get ending time for timer and calculate total time
-	end = clock();
-	elapsed = (end-start) / CLOCKS_PER_SEC;
-
-	// print time to log file
-	fprintf(outfile2, "Elapsed time for M-Lab: %f\n", elapsed);
 	
 
 	// call iplane
-	// set start time for timer
-	start = clock();
 
 	// build string for parameter
 	strcpy(iplaneparams, "python iplane_trace.py ");
@@ -201,15 +165,6 @@ int main(int argc, char *argv[])
 	printf("Working iPlane...\n");
 	system(iplaneparams);
 
-	// get ending time for timer and calculate total time
-	end = clock();
-	elapsed = (end-start) / CLOCKS_PER_SEC;
-
-	// print time to log file
-	fprintf(outfile2, "Elapsed time for iPlane: %f", elapsed);
-
-	// close log file
-	fclose(outfile2);
 
 	// end program
 	return 0;

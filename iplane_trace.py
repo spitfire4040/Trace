@@ -3,6 +3,7 @@ import sys
 import os
 import urllib
 import gzip
+import time
 
 
 # get day from command line args
@@ -10,9 +11,9 @@ year = sys.argv[1]
 month = sys.argv[2]
 day = sys.argv[3]
 
-print 'year: ', year
-print 'month: ', month
-print 'day: ', day
+#print 'year: ', year
+#print 'month: ', month
+#print 'day: ', day
 
 
 def parse():
@@ -28,10 +29,11 @@ def parse():
 
 	# initialize variables
 	trace = []
-	all_traces = []
-	all_ips = []
-	unique_traces = set()
-	unique_ips = set()	
+	all_trace = []
+	all_ip = []
+	unique_trace = set()
+	unique_ip = set()
+	edgelist = set()
 
 	# open nodelist
 	f = open("nodelist.txt", "r")
@@ -44,7 +46,7 @@ def parse():
 			# retrieve file
 			urllib.urlretrieve("http://iplane.cs.washington.edu/data/iplane_logs/" + year + "/" + month + "/" + day + "/" + line, "/home/jthom/Trace/iplane-temp/temp.gz")
 
-			print "http://iplane.cs.washington.edu/data/iplane_logs/" + year + "/" + month + "/" + day + "/" + line
+			#print "http://iplane.cs.washington.edu/data/iplane_logs/" + year + "/" + month + "/" + day + "/" + line
 
 			# open in and out files for .gz processing
 			with gzip.open("/home/jthom/Trace/iplane-temp/temp.gz", "rb") as in_file:
@@ -68,15 +70,15 @@ def parse():
 					dst = line[1]
 
 					# add to ip lists
-					all_ips.append(dst)
-					unique_ips.add(dst)
+					all_ip.append(dst)
+					unique_ip.add(dst)
 
 					# get rid of empty line
 					if trace != None:
 
 						# add to trace lists
-						all_traces.append(''.join(trace))
-						unique_traces.add(''.join(trace))
+						all_trace.append(''.join(trace))
+						unique_trace.add(''.join(trace))
 
 					# reset lists and flag
 					trace = []
@@ -100,14 +102,15 @@ def parse():
 						trace.append(addr + '-' + str(hop) + ' ')
 
 						# add to ip lists
-						all_ips.append(addr)
-						unique_ips.add(addr)
+						all_ip.append(addr)
+						unique_ip.add(addr)
 
 						# increment hop		
 						hop += 1
 		except:
-			print "No Such File"
-			print ' '
+			#print "No Such File"
+			#print ' '
+			pass
 
 
 
@@ -115,11 +118,56 @@ def parse():
 	f.close()
 
 
+	# find edges...
+	# iterate through unique traces
+	for item in unique_trace:
+
+		# set list so it will reset
+		trace = []
+
+		# split trace and push to list
+		for item in item.split():
+			if (':' in item):
+				pass
+			else:
+				item = item.split('-')
+				trace.append(item[0])
+
+		# find length of list
+		length = len(trace)
+
+		# set iterator variable so it will reset
+		i = 0
+
+		# iterate through trace list for pairs
+		while i < length - 1:
+			first = trace[i]
+			second = trace[i+1]
+
+			# set incrementing value for 0's
+			if first == '*' and second == '*':
+				# don't count * - *
+				pass
+
+			else:
+
+				if first == '*':
+					first = count
+					count += 1
+
+				if second == '*':
+					second = count
+					count += 1
+
+			# add to edgeList set (unique values only)
+			edgelist.add(str(first) + ' ' + str(second))
+			i += 1
+
 	# open all_trace file
-	with open("/home/jthom/Trace/iPlaneData/all_traces.txt", "w") as f:
+	with open("/home/jthom/Trace/iPlaneData/all_trace.txt", "w") as f:
 
 		# write list to file
-		for item in all_traces:
+		for item in all_trace:
 			if not item:
 				pass
 			else:
@@ -127,10 +175,10 @@ def parse():
 
 
 	# open all_ip file
-	with open("/home/jthom/Trace/iPlaneData/all_ips.txt", "w") as f:
+	with open("/home/jthom/Trace/iPlaneData/all_ip.txt", "w") as f:
 
 		# write list to file
-		for item in all_ips:
+		for item in all_ip:
 			if not item:
 				pass
 			else:
@@ -138,10 +186,10 @@ def parse():
 
 
 	# open unique_trace file
-	with open("/home/jthom/Trace/iPlaneData/unique_traces.txt", "w") as f:
+	with open("/home/jthom/Trace/iPlaneData/unique_trace.txt", "w") as f:
 
 		# write list to file
-		for item in unique_traces:
+		for item in unique_trace:
 			if not item:
 				pass
 			else:
@@ -149,26 +197,54 @@ def parse():
 
 
 	# open unique_ip file
-	with open("/home/jthom/Trace/iPlaneData/unique_ips.txt", "w") as f:
+	with open("/home/jthom/Trace/iPlaneData/unique_ip.txt", "w") as f:
 
 		# write list to file
-		for item in unique_ips:
+		for item in unique_ip:
 			if not item:
 				pass
 			else:
 				f.write(item + '\n')
 
 
+	# open unique_edge file
+	with open("/home/jthom/Trace/iPlaneData/unique_edge.txt", "w") as f:
+
+		# write list to file
+		for item in edgelist:
+			if not item:
+				pass
+			else:
+				f.write(item + '\n')
+
+	# open stats file
+	with open("/home/jthom/Trace/iPlaneData/stats.txt", "w") as f:
+		# write stats
+		f.write("Total IP: " + str(len(all_ip)) + '\n')
+		f.write("Unique IP: " + str(len(unique_ip)) + '\n')
+		f.write("Total Trace: " + str(len(all_trace)) + '\n')
+		f.write("Unique Trace: " + str(len(unique_trace)) + '\n')
+		f.write("Unique Edge: " + str(len(edgelist)) + '\n')
+
+
+
 def main(argv):
+
+	start = time.time()
 
 	# run parse
 	parse()
 
 	# trace count
-	#os.system("./iplane-tracecount")
+	os.system("./iplane_tracecount")
 
 	# ip count
-	#os.system("./iplane-ipcount")
+	os.system("./iplane_ipcount")
+
+	end = time.time()
+
+	with open("log.txt", "a") as f:
+		f.write("iPlane Runtime: " + str(end - start) + '\n')
 
 
 if __name__ == '__main__':

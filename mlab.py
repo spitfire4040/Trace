@@ -5,6 +5,7 @@ import urllib
 import tarfile
 import re
 import shutil
+import time
 
 # get day from command line args
 year = sys.argv[1]
@@ -23,7 +24,7 @@ def parse():
 	edgeList = set()
 
 	# open files (works in layers)
-	f = open("/home/jthom/Trace/mlab-nodes.txt", "r")
+	f = open("/home/jay/Trace/mlab-nodes.txt", "r")
 	for line in f:
 		line = line.strip('\n')
 		nodelist.append(line)
@@ -35,17 +36,17 @@ def parse():
 
 			url = "https://storage.googleapis.com/m-lab/paris-traceroute/" + year + "/" + month + "/" + day + "/" + year + month + day + "T000000Z-mlab1-" + item + "-paris-traceroute-0000.tgz"
 
-			print (url)
+			#print (url)
 
-			urllib.urlretrieve(url, "/home/jthom/Trace/mlab-temp/temp.tgz")
-			tfile = tarfile.open("/home/jthom/Trace/mlab-temp/temp.tgz", "r:gz")
-			tfile.extractall(path="/home/jthom/Trace/mlab-temp/")
+			urllib.urlretrieve(url, "/home/jay/Trace/mlab-temp/temp.tgz")
+			tfile = tarfile.open("/home/jay/Trace/mlab-temp/temp.tgz", "r:gz")
+			tfile.extractall(path="/home/jay/Trace/mlab-temp/")
 
-			for l1_filename in os.listdir("/home/jthom/Trace/mlab-temp/" + year):
-				for l2_filename in os.listdir("/home/jthom/Trace/mlab-temp/" + year + "/" + l1_filename):
-					for l3_filename in os.listdir("/home/jthom/Trace/mlab-temp/" + year + "/" + l1_filename +'/' + l2_filename):
-						for l4_filename in os.listdir("/home/jthom/Trace/mlab-temp/" + year + "/" + l1_filename +'/' + l2_filename + '/' + l3_filename):
-							with open("/home/jthom/Trace/mlab-temp/" + year + "/" + l1_filename + "/" + l2_filename + "/" + l3_filename + "/" + l4_filename, "r") as f:
+			for l1_filename in os.listdir("/home/jay/Trace/mlab-temp/" + year):
+				for l2_filename in os.listdir("/home/jay/Trace/mlab-temp/" + year + "/" + l1_filename):
+					for l3_filename in os.listdir("/home/jay/Trace/mlab-temp/" + year + "/" + l1_filename +'/' + l2_filename):
+						for l4_filename in os.listdir("/home/jay/Trace/mlab-temp/" + year + "/" + l1_filename +'/' + l2_filename + '/' + l3_filename):
+							with open("/home/jay/Trace/mlab-temp/" + year + "/" + l1_filename + "/" + l2_filename + "/" + l3_filename + "/" + l4_filename, "r") as f:
 
 								# set variables, flags
 								flag = 0
@@ -119,36 +120,36 @@ def parse():
 			pass
 
 		# delete downloaded files each time
-		if os.path.exists("/home/jthom/Trace/mlab-temp/" + year):
-			shutil.rmtree("/home/jthom/Trace/mlab-temp/" + year)
+		if os.path.exists("/home/jay/Trace/mlab-temp/" + year):
+			shutil.rmtree("/home/jay/Trace/mlab-temp/" + year)
 
-		if os.path.exists("/home/jthom/Trace/mlab-temp/temp.tgz"):
-			os.remove("/home/jthom/Trace/mlab-temp/temp.tgz")
+		if os.path.exists("/home/jay/Trace/mlab-temp/temp.tgz"):
+			os.remove("/home/jay/Trace/mlab-temp/temp.tgz")
 
 
 	# write data to files
-	outfile = open("/home/jthom/Trace/MlabData/all_ip.txt", "w")
+	outfile = open("/home/jay/Trace/MlabData/all_ip.txt", "w")
 	for item in ip_all:
 		outfile.write(item)
 	outfile.close()
 
-	outfile = open("/home/jthom/Trace/MlabData/all_trace.txt", "w")
+	outfile = open("/home/jay/Trace/MlabData/all_trace.txt", "w")
 	for item in trace_all:
 		outfile.write(item)
 	outfile.close()
 
-	outfile = open("/home/jthom/Trace/MlabData/unique_ip.txt", "w")
+	outfile = open("/home/jay/Trace/MlabData/unique_ip.txt", "w")
 	for item in ip_unique:
 		outfile.write(item)
 	outfile.close()
 
-	outfile = open("/home/jthom/Trace/MlabData/unique_trace.txt", "w")
+	outfile = open("/home/jay/Trace/MlabData/unique_trace.txt", "w")
 	for item in trace_unique:
 		outfile.write(item)
 	outfile.close()
 
 	# get edges from unique trace list
-	f = open("/home/jthom/Trace/MlabData/unique_trace.txt", "r")
+	f = open("/home/jay/Trace/MlabData/unique_trace.txt", "r")
 	for item in f:
 
 		# set list so it will reset
@@ -179,7 +180,7 @@ def parse():
 
 
 	# write edgeList to file
-	out = open("/home/jthom/Trace/MlabData/unique_edge.txt", "w")
+	out = open("/home/jay/Trace/MlabData/unique_edge.txt", "w")
 	for item in edgeList:
 		out.write(item + '\n')
 
@@ -188,7 +189,7 @@ def parse():
 	out.close()
 
 	# write stats
-	outfile = open("/home/jthom/Trace/MlabData/stats.txt", "w")
+	outfile = open("/home/jay/Trace/MlabData/stats.txt", "w")
 	outfile.write("Total IP: " + str(len(ip_all)) + '\n')
 	outfile.write("Unique IP: " + str(len(ip_unique)) + '\n')
 	outfile.write("Total Trace: " + str(len(trace_all)) + '\n')
@@ -206,14 +207,22 @@ def parse():
 
 
 def main(argv):
+
+	start = time.time()
+
 	# run parse
 	parse()
 
 	# trace count
-	os.system("./mlab-tracecount")
+	os.system("./mlab_tracecount")
 
 	# ip count
-	os.system("./mlab-ipcount")
+	os.system("./mlab_ipcount")
+
+	end = time.time()
+
+	with open("log.txt", "a") as f:
+		f.write("Mlab Runtime: " + str(end - start) + '\n')
 
 
 if __name__ == '__main__':
