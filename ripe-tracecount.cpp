@@ -9,15 +9,17 @@
 using namespace std;
 
 // main function
-int main()
+int main(int argc, char *argv[])
 {
 	// initialize variables
 	ifstream fin1, fin2;
-	string t1, t2, t3, t4, t5, inFileName1, inFileName2, outFileName, num, temp, day;
+	string inFileName1, inFileName2, outFileName, temp, start_time;
 	ofstream fout;
 	stringstream ss;
-	int i, counter1, counter2, tracecount = 0;
-	u_long num1;
+	long int num1, length1, length2;
+
+	// initialize command line variables
+	start_time = argv[1];
 
 	// initialize sets and iterators
 	set<string> unique_trace;
@@ -26,9 +28,9 @@ int main()
 	multiset<string>::iterator all_trace_iterator;
 
 	// set file name
-	inFileName1 = "/home/jthom/Trace/RipeData/unique_trace.txt"; // unique_trace
-	inFileName2 = "/home/jthom/Trace/RipeData/all_trace.txt"; // all_trace
-	outFileName = "/home/jthom/Trace/RipeData/tracecount.txt"; // trace_count
+	inFileName1 = "/home/jay/Desktop/Trace_01/RipeData/unique_trace_" + start_time + ".txt"; // unique_trace
+	inFileName2 = "/home/jay/Desktop/Trace_01/RipeData/all_trace_" + start_time + ".txt"; // all_trace
+	outFileName = "/home/jay/Desktop/Trace_01/RipeData/tracecount_" + start_time + ".txt"; // trace_count
 
 	// open files
 	fin1.open(inFileName1);
@@ -49,12 +51,19 @@ int main()
 		all_trace.insert(temp);
 	}
 
+	while (fin2.good())
+	{
+		getline(fin2, temp);
+		cout << "blah blah" << endl;
+		cout << temp << endl;
+	}
+
 	// iterate through each value in the unique map and see how many are in the multimap
 	for (unique_trace_iterator = unique_trace.begin(); unique_trace_iterator != unique_trace.end(); unique_trace_iterator++)
 	{
 		temp = *unique_trace_iterator;
 		num1 = all_trace.count(temp);
-		fout << num1 << ' ' << temp << endl;
+		fout << num1 << '\t' << temp << endl;
 	}
 
 	// close files

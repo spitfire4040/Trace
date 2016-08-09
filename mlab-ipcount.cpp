@@ -10,15 +10,20 @@
 using namespace std;
 
 // main function
-int main()
+int main(int argc, char *argv[])
 {
 	// initialize variables
 	ifstream fin1, fin2;
-	string ip1, ip2, ip3, ip4, inFileName1, inFileName2, outFileName, num, temp;
+	string ip1, ip2, ip3, ip4, inFileName1, inFileName2, outFileName, num, temp, year, month, day;
 	ofstream fout;
 	stringstream ss;
 	int i, j, counter1, counter2, tracecount = 0;
 	u_long num1, num2;
+
+	// initialize command line variables
+	year = argv[1];
+	month = argv[2];
+	day = argv[3];
 
 	// initialize sets and iterators
 	set<string> unique_ip;
@@ -27,9 +32,9 @@ int main()
 	multiset<string>::iterator all_ip_iterator;
 
 	// set file name
-	inFileName1 = "/home/jthom/Trace/MlabData/unique_ip.txt"; // unique_ip
-	inFileName2 = "/home/jthom/Trace/MlabData/all_ip.txt"; // all_trace
-	outFileName = "/home/jthom/Trace/MlabData/ipcount.txt"; // ip_count
+	inFileName1 = "/home/jay/Desktop/Trace_01/MlabData/unique_ip_" + month + "_" + day + "_" + year + ".txt"; // unique_ip
+	inFileName2 = "/home/jay/Desktop/Trace_01/MlabData/all_ip_" + month + "_" + day + "_" + year + ".txt"; // all_trace
+	outFileName = "/home/jay/Desktop/Trace_01/MlabData/ipcount_" + month + "_" + day + "_" + year + ".txt"; // ip_count
 
 	// open files
 	fin1.open(inFileName1);

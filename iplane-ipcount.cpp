@@ -1,4 +1,3 @@
-
 // header files
 #include <iostream>
 #include <fstream>
@@ -10,15 +9,19 @@
 using namespace std;
 
 // main function
-int main()
+int main(int argc, char *argv[])
 {
 	// initialize variables
 	ifstream fin1, fin2;
-	string ip1, ip2, ip3, ip4, inFileName1, inFileName2, outFileName, num, temp;
+	string inFileName1, inFileName2, outFileName, num, temp, year, month, day;
 	ofstream fout;
 	stringstream ss;
-	int i, j, counter1, counter2, tracecount = 0;
-	u_long num1, num2;
+	u_long num1;
+
+	// initialize command line variables
+	year = argv[1];
+	month = argv[2];
+	day = argv[3];
 
 	// initialize sets and iterators
 	set<string> unique_ip;
@@ -27,10 +30,9 @@ int main()
 	multiset<string>::iterator all_ip_iterator;
 
 	// set file name
-	// set file name
-	inFileName1 = "/home/jay/Trace/iPlaneData/unique_ip.txt"; // unique_ip
-	inFileName2 = "/home/jay/Trace/iPlaneData/all_ip.txt"; // all_ip
-	outFileName = "/home/jay/Trace/iPlaneData/ipcount.txt"; // ipcount
+	inFileName1 = "/home/jay/Desktop/Trace_01/iPlaneData/unique_ip_" + month + '_' + day + '_' + year + ".txt"; // unique_ip
+	inFileName2 = "/home/jay/Desktop/Trace_01/iPlaneData/all_ip_" + month + '_' + day + '_' + year + ".txt"; // all_ip
+	outFileName = "/home/jay/Desktop/Trace_01/iPlaneData/ipcount_" + month + '_' + day + '_' + year + ".txt"; // ipcount
 
 	// open files
 	fin1.open(inFileName1);

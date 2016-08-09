@@ -10,15 +10,17 @@
 using namespace std;
 
 // main function
-int main()
+int main(int argc, char *argv[])
 {
 	// initialize variables
 	ifstream fin1, fin2;
-	string ip1, ip2, ip3, ip4, inFileName1, inFileName2, outFileName, num, temp;
+	string inFileName1, inFileName2, outFileName, temp, start_time;
 	ofstream fout;
 	stringstream ss;
-	int i, j, counter1, counter2, tracecount = 0;
-	u_long num1, num2;
+	int num1;
+
+	// initialize command line variables
+	start_time = argv[1];
 
 	// initialize sets and iterators
 	set<string> unique_ip;
@@ -28,9 +30,9 @@ int main()
 
 	// set file name
 	// set file name
-	inFileName1 = "/home/jthom/Trace/RipeData/unique_ip.txt"; // unique_ip
-	inFileName2 = "/home/jthom/Trace/RipeData/all_ip.txt"; // all_ip
-	outFileName = "/home/jthom/Trace/RipeData/ipcount.txt"; // ipcount
+	inFileName1 = "/home/jay/Desktop/Trace_01/RipeData/unique_ip_" + start_time + ".txt"; // unique_ip
+	inFileName2 = "/home/jay/Desktop/Trace_01/RipeData/all_ip_" + start_time + ".txt"; // all_ip
+	outFileName = "/home/jay/Desktop/Trace_01/RipeData/ipcount_" + start_time + ".txt"; // ipcount
 
 	// open files
 	fin1.open(inFileName1);
@@ -56,7 +58,7 @@ int main()
 	{
 		temp = *unique_ip_iterator;
 		num1 = all_ip.count(temp);
-		fout << num1 << ' ' << temp << endl;
+		fout << num1 << '\t' << temp << endl;
 	}
 
 	// close files

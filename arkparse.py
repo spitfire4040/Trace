@@ -9,19 +9,13 @@ import requests
 import time
 
 
-# get day from command line args
-year = sys.argv[1]
-month = sys.argv[2]
-day = sys.argv[3]
-
 # initialize node list
 nodelist = []
 
 
-def parse():
+def parse(year, month, day):
 
-	# initialize global variables
-	global day, month, year
+	edgecount = 0
 
 	# open nodelist file
 	f = open("/home/jay/Trace/ark_nodes.txt", "r")
@@ -52,19 +46,19 @@ def parse():
 	count = 1
 
 	# check for directories and create if necessary
-	if not os.path.exists("/home/jay/Trace/ArkData"):
-		os.makedirs("/home/jay/Trace/ArkData")
+	if not os.path.exists("/home/jay/Desktop/Trace_01/ArkData"):
+		os.makedirs("/home/jay/Desktop/Trace_01/ArkData")
 
-	if not os.path.exists("/home/jay/Trace/ark-temp"):
-		os.makedirs("/home/jay/Trace/ark-temp")
+	if not os.path.exists("/home/jay/Desktop/Trace_01/ark-temp"):
+		os.makedirs("/home/jay/Desktop/Trace_01/ark-temp")
 
 	# open files for write
-	out1 = open("/home/jay/Trace/ArkData/all_trace.txt", "w")
-	out2 = open("/home/jay/Trace/ArkData/unique_trace.txt", "w")
-	out3 = open("/home/jay/Trace/ArkData/all_ip.txt", "w")
-	out4 = open("/home/jay/Trace/ArkData/unique_ip.txt", "w")
-	out5 = open("/home/jay/Trace/ArkData/unique_edge.txt", "w")
-	out6 = open("/home/jay/Trace/ArkData/stats.txt", "w")
+	out1 = open("/home/jay/Desktop/Trace_01/ArkData/all_trace_" + month + '_' + day + '_' + year + ".txt", "w")
+	out2 = open("/home/jay/Desktop/Trace_01/ArkData/unique_trace_" + month + '_' + day + '_' + year + ".txt", "w")
+	out3 = open("/home/jay/Desktop/Trace_01/ArkData/all_ip_" + month + '_' + day + '_' + year + ".txt", "w")
+	out4 = open("/home/jay/Desktop/Trace_01/ArkData/unique_ip_" + month + '_' + day + '_' + year + ".txt", "w")
+	out5 = open("/home/jay/Desktop/Trace_01/ArkData/unique_edge_" + month + '_' + day + '_' + year + ".txt", "w")
+	out6 = open("/home/jay/Desktop/Trace_01/ArkData/stats_" + month + '_' + day + '_' + year + ".txt", "w")
 
 	# iterate through each team
 	for x in range(1, 4):
@@ -79,20 +73,20 @@ def parse():
 			filename = "https://topo-data.caida.org/team-probing/list-7.allpref24/team-" + str(x) + "/daily/" + year + "/cycle-" + year + month + day + "/daily.l7.t1.c004642." + year + month + day + "." + item + ".warts.gz"
 
 			# fetch file with requests
-			r = requests.get(filename, auth=("jay@cse.unr.edu", "sherdnig3544"))
+			r = requests.get(filename, auth=("jthom@cse.unr.edu", "sherdnig3544"))
 
 			# open file for write
-			f = open("/home/jay/Trace/ark-temp/temp.gz", "wb")
+			f = open("/home/jay/Desktop/Trace_01/ark-temp/temp.gz", "wb")
 			for chunk in r.iter_content(chunk_size=512 * 1024):
 				if chunk:
 					f.write(chunk)
 			f.close()
 
 			# use scamper to convert to text file
-			os.system("zcat /home/jay/Trace/ark-temp/temp.gz | sc_warts2text > /home/jay/Trace/ark-temp/warts.txt")
+			os.system("zcat /home/jay/Desktop/Trace_01/ark-temp/temp.gz | sc_warts2text > /home/jay/Desktop/Trace_01/ark-temp/warts.txt")
 
 			# open textfile for read
-			f = open("/home/jay/Trace/ark-temp/warts.txt", "r")
+			f = open("/home/jay/Desktop/Trace_01/ark-temp/warts.txt", "r")
 
 			try:
 				# iterate through each line
@@ -105,7 +99,12 @@ def parse():
 					if line[0] != 'traceroute':
 						hop = line[0]
 						ip = line[1]
-						addr = ip + '-' + hop + ' '
+
+						if ip == '*':
+							ip = '0'
+
+						#addr = ip + '-' + hop + ' ' # changed this to make it easier for Abdullah to parse in C
+						addr = ip + ',' + hop + '\t'						
 						trace.append(addr)
 						all_ip.append(ip)
 						unique_ip.add(ip)
@@ -116,6 +115,12 @@ def parse():
 						# get values for src, dst
 						src = line[2]
 						dst = line[4]
+
+						if src == '*':
+							src = '0'
+
+						if dst == '*':
+							dst = '0'
 
 						all_ip.append(src)
 						all_ip.append(dst)
@@ -128,7 +133,7 @@ def parse():
 						else:
 
 							# eliminate trailing '*'s
-							while '*' in trace[-1]:
+							while '0' in trace[-1]:
 								del(trace[-1])
 
 							# convert list to string
@@ -142,7 +147,8 @@ def parse():
 						trace = []
 
 						# append src, dst to new trace
-						trace.append(src + ':' + dst + ' ')
+						#trace.append(src + ':' + dst + ' ') # changed this to make it easier for Abdullah to parse in C
+						trace.append(src + ':' + dst + '\t')						
 
 			except:
 				pass
@@ -150,7 +156,7 @@ def parse():
 			# once more at end to catch last trace
 			try:
 				# eliminate trailing '*'s
-				while '*' in trace[-1]:
+				while '0' in trace[-1]:
 					del(trace[-1])
 
 				# convert list to string
@@ -177,11 +183,13 @@ def parse():
 		trace = []
 
 		# split trace and push to list
-		for item in item.split():
+		#for item in item.split(): # changed this to make it easier for Abdullah to parse in C
+		for item in item.split('\t'):		
 			if (':' in item):
 				pass
 			else:
-				item = item.split('-')
+				#item = item.split('-') # changed this to make it easier for Abdullah to parse in C
+				item = item.split(',')				
 				trace.append(item[0])
 
 		# find length of list
@@ -196,22 +204,23 @@ def parse():
 			second = trace[i+1]
 
 			# set incrementing value for 0's
-			if first == '*' and second == '*':
-				# don't count * - *
+			if first == '0' and second == '0':
+				# don't count 0 - 0
 				pass
 
 			else:
 
-				if first == '*':
+				if first == '0':
 					first = count
 					count += 1
 
-				if second == '*':
+				if second == '0':
 					second = count
 					count += 1
 
 			# add to edgeList set (unique values only)
-			edgeList.add(str(first) + ' ' + str(second))
+			#edgeList.add(str(first) + ' ' + str(second)) # changed this to make it easier for Abdullah to parse in C
+			edgeList.add(str(first) + '\t' + str(second))			
 			i += 1
 
 
@@ -240,12 +249,17 @@ def parse():
 		out5.write(item)
 		out5.write('\n')
 
+		item = item.split('\t')			
+
+		if (('.' in item[0]) and ('.' in item[1])):
+			edgecount += 1
+
 	# write stats
 	out6.write("Total IP: " + str(len(all_ip)) + '\n')
 	out6.write("Unique IP: " + str(len(unique_ip)) + '\n')
 	out6.write("Total Trace: " + str(len(all_trace)) + '\n')
 	out6.write("Unique Trace: " + str(len(unique_trace)) + '\n')
-	out6.write("Unique Edge: " + str(len(edgeList)) + '\n')
+	out6.write("Unique Edge: " + str(edgecount) + '\n')
 
 	# close files
 	out1.close()
@@ -257,22 +271,27 @@ def parse():
 
 
 def main(argv):
+
+	# get day from command line args
+	year = sys.argv[1]
+	month = sys.argv[2]
+	day = sys.argv[3]
 	
 	start = time.time()
 
 	# run parse
-	parse()
+	parse(year, month, day)
 
 	# trace count
-	os.system("./ark_tracecount")
+	os.system("./ark_tracecount " + year + ' ' + month + ' ' + day)
 
 	# ip count
-	os.system("./ark_ipcount")
+	os.system("./ark_ipcount " + year + ' ' + month + ' ' + day)
 
 	end = time.time()
 
 	with open("log.txt", "a") as f:
-		f.write("Ark Runtime: " + str(end - start) + '\n')
+		f.write("Ark:" + '\t' + "Start-Time-" + month + '_' + day + '_' + year + '\t' + "Runtime (minutes)-" + str((end - start)/60) + '\n')
 
 
 
